@@ -5,486 +5,269 @@
 <meta name="viewport" content="width=1920, height=1080">
 <title>Lost Boys Breaks - NFL Break Board</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Teko:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@600;700;800&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --brand-purple: #7B2FBE;
-    --brand-blue: #1E3A8A;
-    --brand-cyan: #06D6E0;
-    --brand-magenta: #C74BDB;
-    --brand-dark: #0A0A1F;
-    --brand-darker: #050510;
-    --neon-purple: #A855F7;
-    --neon-cyan: #22D3EE;
-    --neon-blue: #3B82F6;
-    --claimed-green: #00FF88;
-    --claimed-green-dim: #00CC66;
-    --card-bg: rgba(15, 10, 40, 0.85);
-    --card-border: rgba(120, 60, 200, 0.25);
-  }
 
   body {
     width: 1920px;
     height: 1080px;
     overflow: hidden;
     background: transparent;
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Barlow Condensed', sans-serif;
   }
 
-  .board-container {
+  .board {
     width: 1920px;
     height: 1080px;
-    position: relative;
-    overflow: hidden;
-    background: var(--brand-darker);
-  }
-
-  /* === BACKGROUND EFFECTS === */
-  .bg-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-
-  /* Dark gradient base */
-  .bg-gradient {
-    background:
-      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(123,47,190,0.15) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 85% 80%, rgba(6,214,224,0.1) 0%, transparent 55%),
-      radial-gradient(ellipse 90% 70% at 50% 50%, rgba(30,58,138,0.12) 0%, transparent 60%),
-      linear-gradient(180deg, #08081a 0%, #0d0d2b 40%, #0a0a1f 100%);
-  }
-
-  /* Circuit board pattern */
-  .bg-circuits {
-    opacity: 0.06;
-    background-image:
-      linear-gradient(90deg, var(--neon-cyan) 1px, transparent 1px),
-      linear-gradient(0deg, var(--neon-cyan) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 70%);
-    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 70%);
-  }
-
-  /* Animated scan line */
-  .bg-scanline {
-    background: linear-gradient(180deg, transparent 0%, rgba(6,214,224,0.03) 50%, transparent 100%);
-    height: 200px;
-    width: 100%;
-    position: absolute;
-    top: -200px;
-    animation: scanMove 6s linear infinite;
-  }
-
-  @keyframes scanMove {
-    0% { top: -200px; }
-    100% { top: 1280px; }
-  }
-
-  /* Floating orbs */
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    animation: orbFloat 10s ease-in-out infinite;
-  }
-  .orb-1 { width: 300px; height: 300px; background: rgba(123,47,190,0.2); top: -50px; left: -50px; animation-delay: 0s; }
-  .orb-2 { width: 250px; height: 250px; background: rgba(6,214,224,0.15); bottom: -30px; right: 200px; animation-delay: 3s; }
-  .orb-3 { width: 200px; height: 200px; background: rgba(199,75,219,0.12); top: 200px; right: -50px; animation-delay: 6s; }
-
-  @keyframes orbFloat {
-    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
-    33% { transform: translate(20px, -30px) scale(1.15); opacity: 0.8; }
-    66% { transform: translate(-15px, 20px) scale(0.9); opacity: 0.5; }
-  }
-
-  /* Edge glow lines */
-  .edge-glow-top, .edge-glow-bottom {
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    z-index: 50;
-  }
-  .edge-glow-top {
-    top: 0;
-    background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), var(--brand-magenta), transparent);
-    box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px rgba(6,214,224,0.3);
-  }
-  .edge-glow-bottom {
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, var(--brand-magenta), var(--neon-purple), var(--neon-cyan), transparent);
-    box-shadow: 0 0 15px var(--neon-purple), 0 0 30px rgba(168,85,247,0.3);
-  }
-
-  /* === HEADER === */
-  .header {
-    position: relative;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-    height: 110px;
-    background: linear-gradient(180deg, rgba(10,10,31,0.95) 0%, rgba(10,10,31,0.7) 100%);
-    border-bottom: 1px solid rgba(120,60,200,0.3);
-  }
-
-  .header::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent 0%, var(--neon-cyan) 20%, var(--neon-purple) 50%, var(--brand-magenta) 80%, transparent 100%);
-    opacity: 0.7;
-  }
-
-  /* Logo area */
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-shrink: 0;
-  }
-
-  .logo-img {
-    height: 80px;
-    width: auto;
-    filter: drop-shadow(0 0 12px rgba(6,214,224,0.4));
-  }
-
-  .logo-text {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .logo-title {
-    font-family: 'Teko', sans-serif;
-    font-weight: 700;
-    font-size: 38px;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    line-height: 1;
-    background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 50%, var(--neon-purple) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .logo-subtitle {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--neon-cyan);
-    text-transform: uppercase;
-    letter-spacing: 6px;
-    opacity: 0.8;
-  }
-
-  /* Center header info */
-  .header-center {
-    text-align: center;
-    flex: 1;
-    padding: 0 30px;
-  }
-
-  .break-number {
-    font-family: 'Teko', sans-serif;
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--neon-cyan);
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    opacity: 0.9;
-  }
-
-  .box-info {
-    font-family: 'Teko', sans-serif;
-    font-size: 30px;
-    font-weight: 700;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 0 0 20px rgba(168,85,247,0.3);
-    line-height: 1.1;
-  }
-
-  /* Right header - stats */
-  .header-right {
-    display: flex;
-    gap: 25px;
-    flex-shrink: 0;
-  }
-
-  .stat-box {
-    text-align: center;
-    padding: 8px 20px;
-    background: rgba(123,47,190,0.15);
-    border: 1px solid rgba(168,85,247,0.3);
-    border-radius: 8px;
-    min-width: 120px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stat-box::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
-  }
-
-  .stat-label {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-
-  .stat-value {
-    font-family: 'Teko', sans-serif;
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1;
-    margin-top: 2px;
-  }
-
-  .stat-value.hits { color: var(--neon-cyan); text-shadow: 0 0 12px rgba(6,214,224,0.5); }
-  .stat-value.claimed-count { color: var(--neon-purple); text-shadow: 0 0 12px rgba(168,85,247,0.5); }
-
-  /* === TEAMS GRID === */
-  .teams-grid {
-    position: relative;
-    z-index: 10;
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 7px;
-    padding: 12px 18px 14px;
-    height: calc(1080px - 110px);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 3px;
+    padding: 3px;
+    background: #111;
+    position: relative;
   }
 
-  /* === TEAM CARD === */
-  .team-slot {
+  /* === TEAM TILE === */
+  .tile {
     position: relative;
-    border-radius: 8px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: default;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
+    transition: all 0.35s ease;
+    background: var(--bg);
   }
 
-  /* Top color accent bar */
-  .team-slot::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--team-color, #666), var(--team-color2, var(--team-color, #666)));
-    opacity: 0.8;
-    transition: all 0.3s;
-  }
-
-  /* Inner glow effect */
-  .team-slot::after {
+  /* Subtle inner bevel/shine */
+  .tile::before {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 8px;
-    background: radial-gradient(ellipse 80% 50% at 50% 0%, var(--team-color, transparent) 0%, transparent 70%);
-    opacity: 0.06;
-    transition: opacity 0.4s;
+    background: linear-gradient(160deg, rgba(255,255,255,0.12) 0%, transparent 40%, transparent 80%, rgba(0,0,0,0.15) 100%);
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity 0.3s;
   }
 
-  .team-slot:hover {
-    border-color: rgba(168,85,247,0.5);
-    transform: scale(1.015);
-    box-shadow: 0 0 20px rgba(168,85,247,0.15);
-  }
-
-  .team-slot:hover::after {
-    opacity: 0.12;
-  }
-
-  /* Team logo */
-  .team-logo-wrap {
-    width: 90px;
-    height: 90px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 4px;
-    position: relative;
-    z-index: 2;
-  }
-
-  .team-logo {
-    width: 78px;
-    height: 78px;
+  .tile-logo {
+    width: 68%;
+    height: 55%;
     object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
-    transition: all 0.4s ease;
-  }
-
-  .team-logo-placeholder {
-    width: 78px;
-    height: 78px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--team-color, #444), var(--team-color2, var(--team-color, #666)));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Teko', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    box-shadow:
-      0 4px 15px rgba(0,0,0,0.5),
-      inset 0 2px 6px rgba(255,255,255,0.15),
-      inset 0 -3px 8px rgba(0,0,0,0.3);
-    transition: all 0.4s ease;
     position: relative;
-  }
-
-  /* Ring around logo */
-  .team-logo-placeholder::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.08);
-    transition: border-color 0.3s;
-  }
-
-  .team-name {
-    font-family: 'Teko', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-align: center;
     z-index: 2;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));
+    transition: all 0.4s ease;
+  }
+
+  .tile-abbr {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: #fff;
+    padding: 3px 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 3;
     transition: all 0.3s;
   }
 
-  .team-city {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-    letter-spacing: 2px;
+  /* === CENTER LOGO TILE === */
+  .logo-tile {
+    grid-column: 4 / 6;
+    grid-row: 3 / 5;
+    background: #08081a !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid rgba(120, 60, 200, 0.4);
+  }
+
+  .logo-tile .logo-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at center, rgba(123,47,190,0.2) 0%, transparent 70%),
+      linear-gradient(135deg, #0a0a2a 0%, #0d0d1f 100%);
+  }
+
+  /* Circuit pattern on logo tile */
+  .logo-tile .logo-circuits {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    background-image:
+      linear-gradient(90deg, #06D6E0 1px, transparent 1px),
+      linear-gradient(0deg, #06D6E0 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .logo-tile .logo-img {
+    width: 75%;
+    max-height: 50%;
+    object-fit: contain;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 20px rgba(6,214,224,0.25));
+  }
+
+  .logo-tile .break-info {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .logo-tile .break-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    color: #06D6E0;
+    letter-spacing: 4px;
+    text-shadow: 0 0 12px rgba(6,214,224,0.4);
+  }
+
+  .logo-tile .box-info {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .logo-tile .stats-row {
+    display: flex;
+    gap: 30px;
+    margin-top: 12px;
+    position: relative;
     z-index: 2;
   }
 
-  /* Buyer name */
-  .buyer-name {
-    font-family: 'Chakra Petch', sans-serif;
-    font-size: 13px;
+  .logo-tile .stat-item {
+    text-align: center;
+  }
+
+  .logo-tile .stat-label {
+    font-size: 10px;
     font-weight: 700;
-    color: var(--claimed-green);
-    text-shadow: 0 0 10px rgba(0,255,136,0.4);
-    margin-top: 3px;
-    max-width: 95%;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .logo-tile .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .logo-tile .stat-val.hits { color: #06D6E0; text-shadow: 0 0 8px rgba(6,214,224,0.4); }
+  .logo-tile .stat-val.claimed { color: #A855F7; text-shadow: 0 0 8px rgba(168,85,247,0.4); }
+
+  /* === CLAIMED STATE === */
+  .tile.claimed {
+    background: #1a1a1a !important;
+  }
+
+  .tile.claimed::before {
+    background: linear-gradient(160deg, rgba(255,255,255,0.03) 0%, transparent 40%, transparent 80%, rgba(0,0,0,0.3) 100%);
+  }
+
+  .tile.claimed .tile-logo {
+    filter: grayscale(0.6) brightness(0.4) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    opacity: 0.45;
+  }
+
+  .tile.claimed .tile-abbr {
+    background: #00CC66;
+    color: #000;
+    font-weight: 700;
+  }
+
+  .tile .buyer-name {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: #00FF88;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 5;
+    text-shadow: 0 0 10px rgba(0,255,136,0.6), 0 2px 4px rgba(0,0,0,0.9);
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.35s ease;
+    padding: 0 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: center;
-    z-index: 2;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.4s ease 0.1s;
   }
 
-  /* === CLAIMED STATE === */
-  .team-slot.claimed {
-    background: linear-gradient(135deg, rgba(0,40,25,0.9) 0%, rgba(10,15,35,0.95) 100%);
-    border-color: rgba(0,255,136,0.35);
-    box-shadow:
-      0 0 20px rgba(0,255,136,0.08),
-      inset 0 0 30px rgba(0,255,136,0.03);
-  }
-
-  .team-slot.claimed::before {
-    background: var(--claimed-green);
-    height: 3px;
-    opacity: 1;
-    box-shadow: 0 0 10px rgba(0,255,136,0.5);
-  }
-
-  .team-slot.claimed::after {
-    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,255,136,0.15) 0%, transparent 70%);
-    opacity: 0.3;
-  }
-
-  .team-slot.claimed .buyer-name {
+  .tile.claimed .buyer-name {
     opacity: 1;
     transform: translateY(0);
   }
 
-  .team-slot.claimed .team-logo-placeholder::after {
-    border-color: rgba(0,255,136,0.3);
-  }
-
-  /* Claimed badge */
-  .claimed-badge {
+  /* Claimed checkmark */
+  .tile .check {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 5px;
+    right: 5px;
     width: 22px;
     height: 22px;
+    background: #00FF88;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
     opacity: 0;
-    transform: scale(0) rotate(-180deg);
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    background: var(--claimed-green);
-    box-shadow: 0 0 12px rgba(0,255,136,0.5), 0 2px 6px rgba(0,0,0,0.3);
+    transform: scale(0);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 8px rgba(0,255,136,0.6);
   }
 
-  .claimed-badge svg {
+  .tile .check svg {
     width: 12px;
     height: 12px;
-    fill: none;
     stroke: #000;
     stroke-width: 3;
+    fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
-  .team-slot.claimed .claimed-badge {
+  .tile.claimed .check {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
+    transform: scale(1);
   }
 
-  /* Claim pulse animation */
-  @keyframes claimBurst {
-    0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.5), inset 0 0 0 0 rgba(0,255,136,0.1); }
-    50% { box-shadow: 0 0 0 12px rgba(0,255,136,0), inset 0 0 20px rgba(0,255,136,0.05); }
-    100% { box-shadow: 0 0 0 0 rgba(0,255,136,0), inset 0 0 0 0 rgba(0,255,136,0); }
+  /* Claim flash animation */
+  @keyframes claimFlash {
+    0% { box-shadow: inset 0 0 0 0 rgba(0,255,136,0.5); }
+    30% { box-shadow: inset 0 0 40px 10px rgba(0,255,136,0.2); }
+    100% { box-shadow: inset 0 0 0 0 rgba(0,255,136,0); }
   }
 
-  .team-slot.claim-animate {
-    animation: claimBurst 0.8s ease-out;
+  .tile.claim-animate {
+    animation: claimFlash 0.7s ease-out;
   }
 
-  /* Sparkle particles */
+  /* Sparkles */
   @keyframes sparkle {
     0% { opacity: 1; transform: translate(0,0) scale(1); }
     100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0); }
@@ -492,172 +275,150 @@
 
   .sparkle {
     position: absolute;
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
+    background: #00FF88;
+    box-shadow: 0 0 4px #00FF88;
     pointer-events: none;
     z-index: 30;
-    animation: sparkle 0.7s ease-out forwards;
-  }
-
-  .sparkle.green { background: var(--claimed-green); box-shadow: 0 0 4px var(--claimed-green); }
-  .sparkle.cyan { background: var(--neon-cyan); box-shadow: 0 0 4px var(--neon-cyan); }
-  .sparkle.purple { background: var(--neon-purple); box-shadow: 0 0 4px var(--neon-purple); }
-
-  /* Subtle idle shimmer on available cards */
-  @keyframes shimmer {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 0.04; }
-  }
-
-  .team-slot:not(.claimed)::after {
-    animation: shimmer 4s ease-in-out infinite;
-    animation-delay: var(--shimmer-delay, 0s);
-  }
-
-  /* Noise/grain overlay */
-  .noise-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 128px 128px;
+    animation: sparkle 0.6s ease-out forwards;
   }
 </style>
 </head>
 <body>
-<div class="board-container" id="board">
-  <!-- Background layers -->
-  <div class="bg-layer bg-gradient"></div>
-  <div class="bg-layer bg-circuits"></div>
-  <div class="bg-layer">
-    <div class="bg-scanline"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
-  <div class="edge-glow-top"></div>
-  <div class="edge-glow-bottom"></div>
-
-  <!-- Header -->
-  <div class="header">
-    <div class="header-logo">
-      <img class="logo-img" src="Break Logo.png" alt="Lost Boys Breaks" onerror="this.style.display='none'">
-      <div class="logo-text">
-        <div class="logo-title" id="breakTitle">LOST BOYS BREAKS</div>
-        <div class="logo-subtitle" id="breakSubtitle">BREAK #001</div>
-      </div>
-    </div>
-
-    <div class="header-center">
-      <div class="break-number">NFL FULL CASE BREAK</div>
-      <div class="box-info" id="boxInfo">2024 PANINI PRIZM FOOTBALL HOBBY BOX</div>
-    </div>
-
-    <div class="header-right">
-      <div class="stat-box">
-        <div class="stat-label">Hits</div>
-        <div class="stat-value hits" id="hitTracker">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Claimed</div>
-        <div class="stat-value claimed-count" id="teamsClaimed">0 / 32</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Teams Grid -->
-  <div class="teams-grid" id="teamsGrid"></div>
-
-  <div class="noise-overlay"></div>
-</div>
+<div class="board" id="board"></div>
 
 <script>
 const NFL_TEAMS = [
-  { abbr: "ARI", name: "Cardinals", city: "Arizona", color: "#97233F", color2: "#000000" },
-  { abbr: "ATL", name: "Falcons", city: "Atlanta", color: "#A71930", color2: "#000000" },
-  { abbr: "BAL", name: "Ravens", city: "Baltimore", color: "#241773", color2: "#9E7C0C" },
-  { abbr: "BUF", name: "Bills", city: "Buffalo", color: "#00338D", color2: "#C60C30" },
-  { abbr: "CAR", name: "Panthers", city: "Carolina", color: "#0085CA", color2: "#101820" },
-  { abbr: "CHI", name: "Bears", city: "Chicago", color: "#0B162A", color2: "#C83803" },
-  { abbr: "CIN", name: "Bengals", city: "Cincinnati", color: "#FB4F14", color2: "#000000" },
-  { abbr: "CLE", name: "Browns", city: "Cleveland", color: "#FF3C00", color2: "#311D00" },
-  { abbr: "DAL", name: "Cowboys", city: "Dallas", color: "#003594", color2: "#869397" },
-  { abbr: "DEN", name: "Broncos", city: "Denver", color: "#FB4F14", color2: "#002244" },
-  { abbr: "DET", name: "Lions", city: "Detroit", color: "#0076B6", color2: "#B0B7BC" },
-  { abbr: "GB",  name: "Packers", city: "Green Bay", color: "#203731", color2: "#FFB612" },
-  { abbr: "HOU", name: "Texans", city: "Houston", color: "#03202F", color2: "#A71930" },
-  { abbr: "IND", name: "Colts", city: "Indianapolis", color: "#002C5F", color2: "#A2AAAD" },
-  { abbr: "JAX", name: "Jaguars", city: "Jacksonville", color: "#006778", color2: "#9F792C" },
-  { abbr: "KC",  name: "Chiefs", city: "Kansas City", color: "#E31837", color2: "#FFB81C" },
-  { abbr: "LV",  name: "Raiders", city: "Las Vegas", color: "#A5ACAF", color2: "#000000" },
-  { abbr: "LAC", name: "Chargers", city: "Los Angeles", color: "#0080C6", color2: "#FFC20E" },
-  { abbr: "LAR", name: "Rams", city: "Los Angeles", color: "#003594", color2: "#FFA300" },
-  { abbr: "MIA", name: "Dolphins", city: "Miami", color: "#008E97", color2: "#FC4C02" },
-  { abbr: "MIN", name: "Vikings", city: "Minnesota", color: "#4F2683", color2: "#FFC62F" },
-  { abbr: "NE",  name: "Patriots", city: "New England", color: "#002244", color2: "#C60C30" },
-  { abbr: "NO",  name: "Saints", city: "New Orleans", color: "#D3BC8D", color2: "#101820" },
-  { abbr: "NYG", name: "Giants", city: "New York", color: "#0B2265", color2: "#A71930" },
-  { abbr: "NYJ", name: "Jets", city: "New York", color: "#125740", color2: "#000000" },
-  { abbr: "PHI", name: "Eagles", city: "Philadelphia", color: "#004C54", color2: "#A5ACAF" },
-  { abbr: "PIT", name: "Steelers", city: "Pittsburgh", color: "#FFB612", color2: "#101820" },
-  { abbr: "SF",  name: "49ers", city: "San Francisco", color: "#AA0000", color2: "#B3995D" },
-  { abbr: "SEA", name: "Seahawks", city: "Seattle", color: "#002244", color2: "#69BE28" },
-  { abbr: "TB",  name: "Buccaneers", city: "Tampa Bay", color: "#D50A0A", color2: "#FF7900" },
-  { abbr: "TEN", name: "Titans", city: "Tennessee", color: "#0C2340", color2: "#4B92DB" },
-  { abbr: "WAS", name: "Commanders", city: "Washington", color: "#5A1414", color2: "#FFB612" }
+  { abbr: "ARI", name: "Cardinals", bg: "#97233F" },
+  { abbr: "ATL", name: "Falcons", bg: "#A71930" },
+  { abbr: "BAL", name: "Ravens", bg: "#241773" },
+  { abbr: "BUF", name: "Bills", bg: "#00338D" },
+  { abbr: "CAR", name: "Panthers", bg: "#0085CA" },
+  { abbr: "CHI", name: "Bears", bg: "#0B162A" },
+  { abbr: "CIN", name: "Bengals", bg: "#FB4F14" },
+  { abbr: "CLE", name: "Browns", bg: "#311D00" },
+  { abbr: "DAL", name: "Cowboys", bg: "#003594" },
+  { abbr: "DEN", name: "Broncos", bg: "#002244" },
+  { abbr: "DET", name: "Lions", bg: "#0076B6" },
+  { abbr: "GB",  name: "Packers", bg: "#203731" },
+  { abbr: "HOU", name: "Texans", bg: "#03202F" },
+  { abbr: "IND", name: "Colts", bg: "#002C5F" },
+  { abbr: "JAX", name: "Jaguars", bg: "#006778" },
+  { abbr: "KC",  name: "Chiefs", bg: "#E31837" },
+  { abbr: "LAC", name: "Chargers", bg: "#0080C6" },
+  { abbr: "LAR", name: "Rams", bg: "#003594" },
+  { abbr: "LV",  name: "Raiders", bg: "#A5ACAF" },
+  { abbr: "MIA", name: "Dolphins", bg: "#008E97" },
+  { abbr: "MIN", name: "Vikings", bg: "#4F2683" },
+  { abbr: "NE",  name: "Patriots", bg: "#002244" },
+  { abbr: "NO",  name: "Saints", bg: "#D3BC8D" },
+  { abbr: "NYG", name: "Giants", bg: "#0B2265" },
+  { abbr: "NYJ", name: "Jets", bg: "#125740" },
+  { abbr: "PHI", name: "Eagles", bg: "#004C54" },
+  { abbr: "PIT", name: "Steelers", bg: "#101820" },
+  { abbr: "SEA", name: "Seahawks", bg: "#002244" },
+  { abbr: "SF",  name: "49ers", bg: "#AA0000" },
+  { abbr: "TB",  name: "Buccaneers", bg: "#D50A0A" },
+  { abbr: "TEN", name: "Titans", bg: "#0C2340" },
+  { abbr: "WAS", name: "Commanders", bg: "#5A1414" }
 ];
 
-// ESPN logo CDN mapping
 function getLogoUrl(abbr) {
-  const espnMap = {
-    ARI: 'ari', ATL: 'atl', BAL: 'bal', BUF: 'buf', CAR: 'car', CHI: 'chi',
-    CIN: 'cin', CLE: 'cle', DAL: 'dal', DEN: 'den', DET: 'det', GB: 'gb',
-    HOU: 'hou', IND: 'ind', JAX: 'jax', KC: 'kc', LV: 'lv', LAC: 'lac',
-    LAR: 'lar', MIA: 'mia', MIN: 'min', NE: 'ne', NO: 'no', NYG: 'nyg',
-    NYJ: 'nyj', PHI: 'phi', PIT: 'pit', SF: 'sf', SEA: 'sea', TB: 'tb',
-    TEN: 'ten', WAS: 'wsh'
-  };
-  return `https://a.espncdn.com/i/teamlogos/nfl/500/${espnMap[abbr]}.png`;
+  const m = { ARI:'ari',ATL:'atl',BAL:'bal',BUF:'buf',CAR:'car',CHI:'chi',CIN:'cin',CLE:'cle',DAL:'dal',DEN:'den',DET:'det',GB:'gb',HOU:'hou',IND:'ind',JAX:'jax',KC:'kc',LV:'lv',LAC:'lac',LAR:'lar',MIA:'mia',MIN:'min',NE:'ne',NO:'no',NYG:'nyg',NYJ:'nyj',PHI:'phi',PIT:'pit',SF:'sf',SEA:'sea',TB:'tb',TEN:'ten',WAS:'wsh' };
+  return `https://a.espncdn.com/i/teamlogos/nfl/500/${m[abbr]}.png`;
 }
 
 let boardState = {};
 try { const s = localStorage.getItem('nflBreakBoard'); if (s) boardState = JSON.parse(s); } catch(e) {}
 function saveState() { localStorage.setItem('nflBreakBoard', JSON.stringify(boardState)); }
 
-const grid = document.getElementById('teamsGrid');
-NFL_TEAMS.forEach((team, i) => {
-  const slot = document.createElement('div');
-  slot.className = 'team-slot';
-  slot.id = `team-${team.abbr}`;
-  slot.style.setProperty('--team-color', team.color);
-  slot.style.setProperty('--team-color2', team.color2);
-  slot.style.setProperty('--shimmer-delay', `${(i * 0.3) % 4}s`);
+const board = document.getElementById('board');
 
-  slot.innerHTML = `
-    <div class="claimed-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-    <div class="team-logo-wrap">
-      <img class="team-logo" src="${getLogoUrl(team.abbr)}" alt="${team.name}"
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-      <div class="team-logo-placeholder" style="display:none;">${team.abbr}</div>
-    </div>
-    <div class="team-city">${team.city}</div>
-    <div class="team-name">${team.name}</div>
-    <div class="buyer-name" id="buyer-${team.abbr}"></div>
-  `;
-  grid.appendChild(slot);
-});
+// Grid: 8 cols x 5 rows = 40 cells
+// Logo tile at center: col 4-5, row 3-4 (takes 4 cells)
+// That leaves 36 cells for 32 teams + we need to skip 4 cells
+// Layout plan:
+// Row 1: 8 teams (0-7)
+// Row 2: 8 teams (8-15)
+// Row 3: 3 teams (16-18), LOGO (2 cols), 3 teams (19-21)
+// Row 4: 3 teams (22-24), LOGO cont, 3 teams (25-27)
+// Row 5: 4 teams (28-31) + 4 empty/filler
+
+// Build cells in order
+let teamIdx = 0;
+
+for (let row = 0; row < 5; row++) {
+  for (let col = 0; col < 8; col++) {
+    // Logo tile at col 3-4, row 2-3 (0-indexed)
+    if (row === 2 && col === 3) {
+      const logoDiv = document.createElement('div');
+      logoDiv.className = 'logo-tile';
+      logoDiv.innerHTML = `
+        <div class="logo-bg"></div>
+        <div class="logo-circuits"></div>
+        <img class="logo-img" src="Break Logo.png" alt="Lost Boys Breaks">
+        <div class="break-info">
+          <div class="break-title" id="breakSubtitle">BREAK #001</div>
+          <div class="box-info" id="boxInfo">2024 PANINI PRIZM FOOTBALL HOBBY</div>
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-label">HITS</div>
+              <div class="stat-val hits" id="hitTracker">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">CLAIMED</div>
+              <div class="stat-val claimed" id="teamsClaimed">0/32</div>
+            </div>
+          </div>
+        </div>
+      `;
+      board.appendChild(logoDiv);
+      continue;
+    }
+    // Skip cells occupied by logo tile (it spans 2x2)
+    if ((row === 2 && col === 4) || (row === 3 && col === 3) || (row === 3 && col === 4)) {
+      continue;
+    }
+
+    // Team tiles
+    if (teamIdx < NFL_TEAMS.length) {
+      const team = NFL_TEAMS[teamIdx];
+      const div = document.createElement('div');
+      div.className = 'tile';
+      div.id = `team-${team.abbr}`;
+      div.style.setProperty('--bg', team.bg);
+      div.innerHTML = `
+        <div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <img class="tile-logo" src="${getLogoUrl(team.abbr)}" alt="${team.name}" onerror="this.style.display='none'">
+        <div class="buyer-name" id="buyer-${team.abbr}"></div>
+        <div class="tile-abbr">${team.abbr}</div>
+      `;
+      board.appendChild(div);
+      teamIdx++;
+    } else {
+      // Empty filler cells for remaining spots in row 5
+      const filler = document.createElement('div');
+      filler.style.background = '#08081a';
+      board.appendChild(filler);
+    }
+  }
+}
+
+function updateCounter() {
+  const c = Object.keys(boardState).length;
+  document.getElementById('teamsClaimed').textContent = `${c}/32`;
+}
 
 function applyState() {
   NFL_TEAMS.forEach(team => {
     const slot = document.getElementById(`team-${team.abbr}`);
     const buyer = document.getElementById(`buyer-${team.abbr}`);
-    if (boardState[team.abbr]) {
+    if (slot && boardState[team.abbr]) {
       slot.classList.add('claimed');
       buyer.textContent = boardState[team.abbr];
-    } else {
+    } else if (slot) {
       slot.classList.remove('claimed');
       buyer.textContent = '';
     }
@@ -665,32 +426,21 @@ function applyState() {
   updateCounter();
 }
 
-function updateCounter() {
-  const c = Object.keys(boardState).length;
-  document.getElementById('teamsClaimed').textContent = `${c} / 32`;
-}
-
 function createSparkles(el) {
   const rect = el.getBoundingClientRect();
-  const colors = ['green', 'cyan', 'purple'];
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 12; i++) {
     const s = document.createElement('div');
-    s.className = `sparkle ${colors[i % 3]}`;
-    const angle = (Math.PI * 2 * i) / 16;
-    const dist = 30 + Math.random() * 50;
+    s.className = 'sparkle';
+    const angle = (Math.PI * 2 * i) / 12;
+    const dist = 25 + Math.random() * 35;
     s.style.left = (rect.width / 2) + 'px';
     s.style.top = (rect.height / 2) + 'px';
     s.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
     s.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
     el.appendChild(s);
-    setTimeout(() => s.remove(), 700);
+    setTimeout(() => s.remove(), 600);
   }
 }
-
-// Listen for commands
-window.addEventListener('message', e => handleCommand(e.data));
-const channel = new BroadcastChannel('nfl-break-board');
-channel.onmessage = e => handleCommand(e.data);
 
 function handleCommand(data) {
   if (data.type === 'claim') {
@@ -700,7 +450,7 @@ function handleCommand(data) {
     slot.classList.add('claimed', 'claim-animate');
     createSparkles(slot);
     document.getElementById(`buyer-${data.team}`).textContent = data.buyer;
-    setTimeout(() => slot.classList.remove('claim-animate'), 800);
+    setTimeout(() => slot.classList.remove('claim-animate'), 700);
     updateCounter();
   } else if (data.type === 'unclaim') {
     delete boardState[data.team];
@@ -713,12 +463,16 @@ function handleCommand(data) {
     saveState();
     applyState();
   } else if (data.type === 'updateHeader') {
-    if (data.breakTitle) document.getElementById('breakTitle').textContent = data.breakTitle;
+    if (data.breakTitle !== undefined) document.getElementById('breakTitle') && (document.getElementById('breakTitle').textContent = data.breakTitle);
     if (data.breakSubtitle) document.getElementById('breakSubtitle').textContent = data.breakSubtitle;
     if (data.boxInfo) document.getElementById('boxInfo').textContent = data.boxInfo;
     if (data.hitTracker) document.getElementById('hitTracker').textContent = data.hitTracker;
   }
 }
+
+window.addEventListener('message', e => handleCommand(e.data));
+const channel = new BroadcastChannel('nfl-break-board');
+channel.onmessage = e => handleCommand(e.data);
 
 applyState();
 </script>
