@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>NFL Break Board Overlay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Russo+One&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'Oswald', sans-serif;
+  }
+
+  .board-container {
+    width: 1920px;
+    height: 1080px;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated background particles */
+  .bg-effects {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-effects .glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .bg-effects .glow:nth-child(1) { width: 400px; height: 400px; background: #ff4444; top: -100px; left: -100px; animation-delay: 0s; }
+  .bg-effects .glow:nth-child(2) { width: 350px; height: 350px; background: #4488ff; top: 300px; right: -50px; animation-delay: 2s; }
+  .bg-effects .glow:nth-child(3) { width: 300px; height: 300px; background: #44ff88; bottom: -50px; left: 400px; animation-delay: 4s; }
+  .bg-effects .glow:nth-child(4) { width: 250px; height: 250px; background: #ffaa00; top: 100px; left: 900px; animation-delay: 6s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -20px) scale(1.1); }
+    50% { transform: translate(-20px, 30px) scale(0.9); }
+    75% { transform: translate(20px, 20px) scale(1.05); }
+  }
+
+  /* Header */
+  .header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 30px;
+    height: 100px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%);
+    border-bottom: 3px solid;
+    border-image: linear-gradient(90deg, #ff4444, #ffaa00, #44ff88, #4488ff, #aa44ff) 1;
+  }
+
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .break-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 36px;
+    color: #ffffff;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(255,100,0,0.5), 2px 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 2px;
+  }
+
+  .break-subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    color: #ffaa00;
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+
+  .header-center {
+    text-align: center;
+  }
+
+  .box-info {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: #00ffaa;
+    text-shadow: 0 0 15px rgba(0,255,170,0.4);
+    letter-spacing: 3px;
+  }
+
+  .header-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .hit-tracker-label {
+    font-size: 14px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .hit-tracker {
+    font-family: 'Russo One', sans-serif;
+    font-size: 28px;
+    color: #ff4444;
+    text-shadow: 0 0 15px rgba(255,68,68,0.5);
+  }
+
+  .teams-claimed {
+    font-size: 16px;
+    color: #aaa;
+    margin-top: 2px;
+  }
+
+  /* Teams Grid */
+  .teams-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 8px;
+    padding: 15px 20px;
+    height: calc(1080px - 100px);
+  }
+
+  .team-slot {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid rgba(255,255,255,0.1);
+    background: rgba(20, 20, 40, 0.85);
+  }
+
+  .team-slot::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--team-color, #666);
+    transition: height 0.3s ease;
+  }
+
+  .team-slot:hover {
+    transform: scale(1.02);
+    border-color: var(--team-color, #666);
+    box-shadow: 0 0 20px rgba(var(--team-color-rgb, 100,100,100), 0.3);
+  }
+
+  .team-logo-container {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    position: relative;
+  }
+
+  .team-logo {
+    width: 85px;
+    height: 85px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    transition: all 0.4s ease;
+  }
+
+  .team-logo-placeholder {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: var(--team-color, #666);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 -3px 8px rgba(0,0,0,0.3), inset 0 3px 8px rgba(255,255,255,0.1);
+    transition: all 0.4s ease;
+  }
+
+  .team-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .team-city {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+
+  /* Claimed state */
+  .team-slot.claimed {
+    background: linear-gradient(135deg, rgba(20,60,20,0.9) 0%, rgba(10,40,10,0.95) 100%);
+    border-color: #00ff66;
+    box-shadow: 0 0 25px rgba(0,255,102,0.2), inset 0 0 30px rgba(0,255,102,0.05);
+  }
+
+  .team-slot.claimed::before {
+    height: 100%;
+    opacity: 0.08;
+  }
+
+  .team-slot.claimed .team-logo-placeholder {
+    box-shadow: 0 0 20px rgba(0,255,102,0.3), 0 4px 15px rgba(0,0,0,0.4);
+  }
+
+  .buyer-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #00ff66;
+    text-shadow: 0 0 10px rgba(0,255,102,0.4);
+    margin-top: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 5px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+  }
+
+  .team-slot.claimed .buyer-name {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Claimed checkmark */
+  .claimed-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: #00ff66;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 15px rgba(0,255,102,0.5);
+    z-index: 5;
+  }
+
+  .team-slot.claimed .claimed-badge {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Claim animation */
+  @keyframes claimPulse {
+    0% { box-shadow: 0 0 0 0 rgba(0,255,102,0.6); }
+    50% { box-shadow: 0 0 0 15px rgba(0,255,102,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,255,102,0); }
+  }
+
+  .team-slot.claim-animate {
+    animation: claimPulse 0.8s ease-out;
+  }
+
+  /* Sparkle effect on claim */
+  @keyframes sparkle {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0); }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #00ff66;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 20;
+    animation: sparkle 0.6s ease-out forwards;
+  }
+
+  /* Available pulse */
+  @keyframes availablePulse {
+    0%, 100% { border-color: rgba(255,255,255,0.1); }
+    50% { border-color: rgba(255,255,255,0.25); }
+  }
+
+  .team-slot:not(.claimed) {
+    animation: availablePulse 3s ease-in-out infinite;
+  }
+
+  /* Scanline effect */
+  .scanline {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+<div class="board-container" id="board">
+  <div class="bg-effects">
+    <div class="glow"></div>
+    <div class="glow"></div>
+    <div class="glow"></div>
+    <div class="glow"></div>
+  </div>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="break-title" id="breakTitle">NFL FULL CASE BREAK</div>
+      <div class="break-subtitle" id="breakSubtitle">BREAK #001</div>
+    </div>
+    <div class="header-center">
+      <div class="box-info" id="boxInfo">2024 PANINI PRIZM FOOTBALL HOBBY BOX</div>
+    </div>
+    <div class="header-right">
+      <div class="hit-tracker-label">HIT TRACKER</div>
+      <div class="hit-tracker" id="hitTracker">0 HITS</div>
+      <div class="teams-claimed" id="teamsClaimed">0 / 32 CLAIMED</div>
+    </div>
+  </div>
+
+  <div class="teams-grid" id="teamsGrid"></div>
+
+  <div class="scanline"></div>
+</div>
+
+<script>
+const NFL_TEAMS = [
+  { abbr: "ARI", name: "Cardinals", city: "Arizona", color: "#97233F", colorRgb: "151,35,63" },
+  { abbr: "ATL", name: "Falcons", city: "Atlanta", color: "#A71930", colorRgb: "167,25,48" },
+  { abbr: "BAL", name: "Ravens", city: "Baltimore", color: "#241773", colorRgb: "36,23,115" },
+  { abbr: "BUF", name: "Bills", city: "Buffalo", color: "#00338D", colorRgb: "0,51,141" },
+  { abbr: "CAR", name: "Panthers", city: "Carolina", color: "#0085CA", colorRgb: "0,133,202" },
+  { abbr: "CHI", name: "Bears", city: "Chicago", color: "#0B162A", colorRgb: "11,22,42" },
+  { abbr: "CIN", name: "Bengals", city: "Cincinnati", color: "#FB4F14", colorRgb: "251,79,20" },
+  { abbr: "CLE", name: "Browns", city: "Cleveland", color: "#FF3C00", colorRgb: "255,60,0" },
+  { abbr: "DAL", name: "Cowboys", city: "Dallas", color: "#003594", colorRgb: "0,53,148" },
+  { abbr: "DEN", name: "Broncos", city: "Denver", color: "#FB4F14", colorRgb: "251,79,20" },
+  { abbr: "DET", name: "Lions", city: "Detroit", color: "#0076B6", colorRgb: "0,118,182" },
+  { abbr: "GB",  name: "Packers", city: "Green Bay", color: "#203731", colorRgb: "32,55,49" },
+  { abbr: "HOU", name: "Texans", city: "Houston", color: "#03202F", colorRgb: "3,32,47" },
+  { abbr: "IND", name: "Colts", city: "Indianapolis", color: "#002C5F", colorRgb: "0,44,95" },
+  { abbr: "JAX", name: "Jaguars", city: "Jacksonville", color: "#006778", colorRgb: "0,103,120" },
+  { abbr: "KC",  name: "Chiefs", city: "Kansas City", color: "#E31837", colorRgb: "227,24,55" },
+  { abbr: "LV",  name: "Raiders", city: "Las Vegas", color: "#A5ACAF", colorRgb: "165,172,175" },
+  { abbr: "LAC", name: "Chargers", city: "Los Angeles", color: "#0080C6", colorRgb: "0,128,198" },
+  { abbr: "LAR", name: "Rams", city: "Los Angeles", color: "#003594", colorRgb: "0,53,148" },
+  { abbr: "MIA", name: "Dolphins", city: "Miami", color: "#008E97", colorRgb: "0,142,151" },
+  { abbr: "MIN", name: "Vikings", city: "Minnesota", color: "#4F2683", colorRgb: "79,38,131" },
+  { abbr: "NE",  name: "Patriots", city: "New England", color: "#002244", colorRgb: "0,34,68" },
+  { abbr: "NO",  name: "Saints", city: "New Orleans", color: "#D3BC8D", colorRgb: "211,188,141" },
+  { abbr: "NYG", name: "Giants", city: "New York", color: "#0B2265", colorRgb: "11,34,101" },
+  { abbr: "NYJ", name: "Jets", city: "New York", color: "#125740", colorRgb: "18,87,64" },
+  { abbr: "PHI", name: "Eagles", city: "Philadelphia", color: "#004C54", colorRgb: "0,76,84" },
+  { abbr: "PIT", name: "Steelers", city: "Pittsburgh", color: "#FFB612", colorRgb: "255,182,18" },
+  { abbr: "SF",  name: "49ers", city: "San Francisco", color: "#AA0000", colorRgb: "170,0,0" },
+  { abbr: "SEA", name: "Seahawks", city: "Seattle", color: "#002244", colorRgb: "0,34,68" },
+  { abbr: "TB",  name: "Buccaneers", city: "Tampa Bay", color: "#D50A0A", colorRgb: "213,10,10" },
+  { abbr: "TEN", name: "Titans", city: "Tennessee", color: "#0C2340", colorRgb: "12,35,64" },
+  { abbr: "WAS", name: "Commanders", city: "Washington", color: "#5A1414", colorRgb: "90,20,20" }
+];
+
+// State
+let boardState = {};
+try {
+  const saved = localStorage.getItem('nflBreakBoard');
+  if (saved) boardState = JSON.parse(saved);
+} catch(e) {}
+
+function saveState() {
+  localStorage.setItem('nflBreakBoard', JSON.stringify(boardState));
+}
+
+// Build grid
+const grid = document.getElementById('teamsGrid');
+NFL_TEAMS.forEach(team => {
+  const slot = document.createElement('div');
+  slot.className = 'team-slot';
+  slot.id = `team-${team.abbr}`;
+  slot.style.setProperty('--team-color', team.color);
+  slot.style.setProperty('--team-color-rgb', team.colorRgb);
+
+  const hasLogo = false; // Set to true when logo files are added
+
+  slot.innerHTML = `
+    <div class="claimed-badge">&#10003;</div>
+    <div class="team-logo-container">
+      ${hasLogo
+        ? `<img class="team-logo" src="logos/${team.abbr.toLowerCase()}.png" alt="${team.name}">`
+        : `<div class="team-logo-placeholder">${team.abbr}</div>`
+      }
+    </div>
+    <div class="team-city">${team.city}</div>
+    <div class="team-name">${team.name}</div>
+    <div class="buyer-name" id="buyer-${team.abbr}"></div>
+  `;
+
+  grid.appendChild(slot);
+});
+
+// Apply saved state
+function applyState() {
+  NFL_TEAMS.forEach(team => {
+    const slot = document.getElementById(`team-${team.abbr}`);
+    const buyerEl = document.getElementById(`buyer-${team.abbr}`);
+    if (boardState[team.abbr]) {
+      slot.classList.add('claimed');
+      buyerEl.textContent = boardState[team.abbr];
+    } else {
+      slot.classList.remove('claimed');
+      buyerEl.textContent = '';
+    }
+  });
+  updateCounter();
+}
+
+function updateCounter() {
+  const claimed = Object.keys(boardState).length;
+  document.getElementById('teamsClaimed').textContent = `${claimed} / 32 CLAIMED`;
+}
+
+function createSparkles(element) {
+  const rect = element.getBoundingClientRect();
+  for (let i = 0; i < 12; i++) {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    const angle = (Math.PI * 2 * i) / 12;
+    const dist = 40 + Math.random() * 40;
+    sparkle.style.left = (rect.width / 2) + 'px';
+    sparkle.style.top = (rect.height / 2) + 'px';
+    sparkle.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+    sparkle.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+    element.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 600);
+  }
+}
+
+// Listen for messages from control panel
+window.addEventListener('message', (e) => {
+  if (e.data.type === 'claim') {
+    boardState[e.data.team] = e.data.buyer;
+    saveState();
+    const slot = document.getElementById(`team-${e.data.team}`);
+    slot.classList.add('claimed', 'claim-animate');
+    createSparkles(slot);
+    document.getElementById(`buyer-${e.data.team}`).textContent = e.data.buyer;
+    setTimeout(() => slot.classList.remove('claim-animate'), 800);
+    updateCounter();
+  } else if (e.data.type === 'unclaim') {
+    delete boardState[e.data.team];
+    saveState();
+    const slot = document.getElementById(`team-${e.data.team}`);
+    slot.classList.remove('claimed');
+    document.getElementById(`buyer-${e.data.team}`).textContent = '';
+    updateCounter();
+  } else if (e.data.type === 'reset') {
+    boardState = {};
+    saveState();
+    applyState();
+  } else if (e.data.type === 'updateHeader') {
+    if (e.data.breakTitle) document.getElementById('breakTitle').textContent = e.data.breakTitle;
+    if (e.data.breakSubtitle) document.getElementById('breakSubtitle').textContent = e.data.breakSubtitle;
+    if (e.data.boxInfo) document.getElementById('boxInfo').textContent = e.data.boxInfo;
+    if (e.data.hitTracker) document.getElementById('hitTracker').textContent = e.data.hitTracker;
+  }
+});
+
+// Also listen for BroadcastChannel (cross-tab communication)
+const channel = new BroadcastChannel('nfl-break-board');
+channel.onmessage = (e) => {
+  window.dispatchEvent(new MessageEvent('message', { data: e.data }));
+};
+
+applyState();
+</script>
+</body>
+</html>

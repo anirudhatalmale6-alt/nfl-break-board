@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NFL Break Board - Control Panel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Russo+One&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Oswald', sans-serif;
+    background: #111;
+    color: #eee;
+    min-height: 100vh;
+  }
+
+  .control-header {
+    background: linear-gradient(135deg, #1a1a3e, #0a0a1a);
+    padding: 20px 30px;
+    border-bottom: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .control-header h1 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 24px;
+    color: #fff;
+    letter-spacing: 2px;
+  }
+
+  .control-header .status {
+    font-size: 14px;
+    color: #00ff66;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .control-header .status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #00ff66;
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Header Editor */
+  .header-editor {
+    background: #1a1a2e;
+    padding: 20px 30px;
+    border-bottom: 1px solid #333;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field-group label {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .field-group input {
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .field-group input:focus {
+    outline: none;
+    border-color: #4488ff;
+  }
+
+  .btn-update-header {
+    align-self: flex-end;
+    background: #4488ff;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.3s;
+  }
+
+  .btn-update-header:hover { background: #3377ee; }
+
+  /* Action bar */
+  .action-bar {
+    background: #1a1a2e;
+    padding: 12px 30px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .action-bar .search-box {
+    flex: 1;
+    min-width: 200px;
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+  }
+
+  .action-bar .search-box:focus {
+    outline: none;
+    border-color: #4488ff;
+  }
+
+  .btn-reset {
+    background: #ff4444;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.3s;
+  }
+
+  .btn-reset:hover { background: #dd3333; }
+
+  .counter {
+    font-size: 18px;
+    color: #ffaa00;
+    font-weight: 600;
+  }
+
+  /* Teams Grid */
+  .teams-control-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    padding: 20px 30px;
+  }
+
+  .team-card {
+    background: #1a1a2e;
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .team-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--team-color, #666);
+  }
+
+  .team-card.claimed {
+    border-color: #00ff66;
+    background: linear-gradient(135deg, #1a2e1a, #1a1a2e);
+  }
+
+  .team-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .team-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--team-color, #666);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Russo One', sans-serif;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .team-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .team-info p {
+    font-size: 13px;
+    color: #888;
+  }
+
+  .team-card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .team-card-actions input {
+    flex: 1;
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+  }
+
+  .team-card-actions input:focus {
+    outline: none;
+    border-color: #00ff66;
+  }
+
+  .btn-claim {
+    background: #00cc55;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background 0.3s;
+  }
+
+  .btn-claim:hover { background: #00aa44; }
+
+  .btn-unclaim {
+    background: #ff6644;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: background 0.3s;
+  }
+
+  .btn-unclaim:hover { background: #dd5533; }
+
+  .claimed-name {
+    font-size: 16px;
+    color: #00ff66;
+    font-weight: 600;
+    padding: 5px 0;
+  }
+
+  .team-card.hidden { display: none; }
+
+  /* Quick claim modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: #1a1a2e;
+    border: 2px solid #4488ff;
+    border-radius: 12px;
+    padding: 30px;
+    width: 400px;
+    max-width: 90vw;
+  }
+
+  .modal h2 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 22px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .modal input {
+    width: 100%;
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .modal input:focus {
+    outline: none;
+    border-color: #00ff66;
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-btns button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .modal-btns .btn-confirm {
+    background: #00cc55;
+    color: #fff;
+  }
+
+  .modal-btns .btn-cancel {
+    background: #444;
+    color: #fff;
+  }
+
+  /* Toast notifications */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #00cc55;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    z-index: 2000;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Instructions */
+  .instructions {
+    background: #0a0a1a;
+    padding: 15px 30px;
+    border-top: 1px solid #333;
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+  }
+
+  .instructions strong { color: #888; }
+</style>
+</head>
+<body>
+
+<div class="control-header">
+  <h1>NFL BREAK BOARD - CONTROL PANEL</h1>
+  <div class="status">Connected to Overlay</div>
+</div>
+
+<div class="header-editor">
+  <div class="field-group">
+    <label>Break Title</label>
+    <input type="text" id="inputBreakTitle" value="NFL FULL CASE BREAK" placeholder="Break title...">
+  </div>
+  <div class="field-group">
+    <label>Break Number / Subtitle</label>
+    <input type="text" id="inputBreakSubtitle" value="BREAK #001" placeholder="Break #...">
+  </div>
+  <div class="field-group">
+    <label>Box / Product Info</label>
+    <input type="text" id="inputBoxInfo" value="2024 PANINI PRIZM FOOTBALL HOBBY BOX" placeholder="Box info...">
+  </div>
+  <div class="field-group">
+    <label>Hit Tracker</label>
+    <input type="text" id="inputHitTracker" value="0 HITS" placeholder="Hit count...">
+  </div>
+  <div class="field-group">
+    <button class="btn-update-header" onclick="updateHeader()">UPDATE OVERLAY</button>
+  </div>
+</div>
+
+<div class="action-bar">
+  <input type="text" class="search-box" id="searchBox" placeholder="Search teams..." oninput="filterTeams()">
+  <div class="counter" id="counter">0 / 32 Claimed</div>
+  <button class="btn-reset" onclick="resetBoard()">RESET ALL</button>
+</div>
+
+<div class="teams-control-grid" id="teamsControlGrid"></div>
+
+<div class="instructions">
+  <strong>How to use:</strong> Open <code>overlay.html</code> as a Browser Source in OBS (1920x1080). Keep this control panel open in a separate browser tab. Changes appear instantly on the overlay.
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const NFL_TEAMS = [
+  { abbr: "ARI", name: "Cardinals", city: "Arizona", color: "#97233F" },
+  { abbr: "ATL", name: "Falcons", city: "Atlanta", color: "#A71930" },
+  { abbr: "BAL", name: "Ravens", city: "Baltimore", color: "#241773" },
+  { abbr: "BUF", name: "Bills", city: "Buffalo", color: "#00338D" },
+  { abbr: "CAR", name: "Panthers", city: "Carolina", color: "#0085CA" },
+  { abbr: "CHI", name: "Bears", city: "Chicago", color: "#0B162A" },
+  { abbr: "CIN", name: "Bengals", city: "Cincinnati", color: "#FB4F14" },
+  { abbr: "CLE", name: "Browns", city: "Cleveland", color: "#FF3C00" },
+  { abbr: "DAL", name: "Cowboys", city: "Dallas", color: "#003594" },
+  { abbr: "DEN", name: "Broncos", city: "Denver", color: "#FB4F14" },
+  { abbr: "DET", name: "Lions", city: "Detroit", color: "#0076B6" },
+  { abbr: "GB",  name: "Packers", city: "Green Bay", color: "#203731" },
+  { abbr: "HOU", name: "Texans", city: "Houston", color: "#03202F" },
+  { abbr: "IND", name: "Colts", city: "Indianapolis", color: "#002C5F" },
+  { abbr: "JAX", name: "Jaguars", city: "Jacksonville", color: "#006778" },
+  { abbr: "KC",  name: "Chiefs", city: "Kansas City", color: "#E31837" },
+  { abbr: "LV",  name: "Raiders", city: "Las Vegas", color: "#A5ACAF" },
+  { abbr: "LAC", name: "Chargers", city: "Los Angeles", color: "#0080C6" },
+  { abbr: "LAR", name: "Rams", city: "Los Angeles", color: "#003594" },
+  { abbr: "MIA", name: "Dolphins", city: "Miami", color: "#008E97" },
+  { abbr: "MIN", name: "Vikings", city: "Minnesota", color: "#4F2683" },
+  { abbr: "NE",  name: "Patriots", city: "New England", color: "#002244" },
+  { abbr: "NO",  name: "Saints", city: "New Orleans", color: "#D3BC8D" },
+  { abbr: "NYG", name: "Giants", city: "New York", color: "#0B2265" },
+  { abbr: "NYJ", name: "Jets", city: "New York", color: "#125740" },
+  { abbr: "PHI", name: "Eagles", city: "Philadelphia", color: "#004C54" },
+  { abbr: "PIT", name: "Steelers", city: "Pittsburgh", color: "#FFB612" },
+  { abbr: "SF",  name: "49ers", city: "San Francisco", color: "#AA0000" },
+  { abbr: "SEA", name: "Seahawks", city: "Seattle", color: "#002244" },
+  { abbr: "TB",  name: "Buccaneers", city: "Tampa Bay", color: "#D50A0A" },
+  { abbr: "TEN", name: "Titans", city: "Tennessee", color: "#0C2340" },
+  { abbr: "WAS", name: "Commanders", city: "Washington", color: "#5A1414" }
+];
+
+const channel = new BroadcastChannel('nfl-break-board');
+let boardState = {};
+
+try {
+  const saved = localStorage.getItem('nflBreakBoard');
+  if (saved) boardState = JSON.parse(saved);
+} catch(e) {}
+
+function sendCommand(data) {
+  channel.postMessage(data);
+  // Also try postMessage to overlay window if opened
+  if (window.opener) window.opener.postMessage(data, '*');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function updateCounter() {
+  const claimed = Object.keys(boardState).length;
+  document.getElementById('counter').textContent = `${claimed} / 32 Claimed`;
+}
+
+function saveState() {
+  localStorage.setItem('nflBreakBoard', JSON.stringify(boardState));
+}
+
+// Build team cards
+const controlGrid = document.getElementById('teamsControlGrid');
+NFL_TEAMS.forEach(team => {
+  const card = document.createElement('div');
+  card.className = 'team-card';
+  card.id = `card-${team.abbr}`;
+  card.style.setProperty('--team-color', team.color);
+  card.dataset.search = `${team.city} ${team.name} ${team.abbr}`.toLowerCase();
+
+  card.innerHTML = `
+    <div class="team-card-header">
+      <div class="team-badge">${team.abbr}</div>
+      <div class="team-info">
+        <h3>${team.name}</h3>
+        <p>${team.city}</p>
+      </div>
+    </div>
+    <div class="team-card-actions" id="actions-${team.abbr}">
+      <input type="text" id="input-${team.abbr}" placeholder="Buyer name..." onkeydown="if(event.key==='Enter')claimTeam('${team.abbr}')">
+      <button class="btn-claim" onclick="claimTeam('${team.abbr}')">CLAIM</button>
+    </div>
+  `;
+
+  controlGrid.appendChild(card);
+});
+
+function claimTeam(abbr) {
+  const input = document.getElementById(`input-${abbr}`);
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+
+  boardState[abbr] = name;
+  saveState();
+  sendCommand({ type: 'claim', team: abbr, buyer: name });
+  renderCard(abbr);
+  updateCounter();
+  showToast(`${abbr} claimed by ${name}!`);
+}
+
+function unclaimTeam(abbr) {
+  delete boardState[abbr];
+  saveState();
+  sendCommand({ type: 'unclaim', team: abbr });
+  renderCard(abbr);
+  updateCounter();
+  showToast(`${abbr} released!`);
+}
+
+function renderCard(abbr) {
+  const card = document.getElementById(`card-${abbr}`);
+  const actionsDiv = document.getElementById(`actions-${abbr}`);
+
+  if (boardState[abbr]) {
+    card.classList.add('claimed');
+    actionsDiv.innerHTML = `
+      <div class="claimed-name">${boardState[abbr]}</div>
+      <button class="btn-unclaim" onclick="unclaimTeam('${abbr}')">RELEASE</button>
+    `;
+  } else {
+    card.classList.remove('claimed');
+    actionsDiv.innerHTML = `
+      <input type="text" id="input-${abbr}" placeholder="Buyer name..." onkeydown="if(event.key==='Enter')claimTeam('${abbr}')">
+      <button class="btn-claim" onclick="claimTeam('${abbr}')">CLAIM</button>
+    `;
+  }
+}
+
+function resetBoard() {
+  if (!confirm('Reset the entire board? This will clear all claimed teams.')) return;
+  boardState = {};
+  saveState();
+  sendCommand({ type: 'reset' });
+  NFL_TEAMS.forEach(t => renderCard(t.abbr));
+  updateCounter();
+  showToast('Board reset!');
+}
+
+function updateHeader() {
+  const data = {
+    type: 'updateHeader',
+    breakTitle: document.getElementById('inputBreakTitle').value,
+    breakSubtitle: document.getElementById('inputBreakSubtitle').value,
+    boxInfo: document.getElementById('inputBoxInfo').value,
+    hitTracker: document.getElementById('inputHitTracker').value
+  };
+  sendCommand(data);
+  showToast('Overlay updated!');
+}
+
+function filterTeams() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  document.querySelectorAll('.team-card').forEach(card => {
+    card.classList.toggle('hidden', q && !card.dataset.search.includes(q));
+  });
+}
+
+// Initial render
+NFL_TEAMS.forEach(t => renderCard(t.abbr));
+updateCounter();
+</script>
+</body>
+</html>
