@@ -3,260 +3,431 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920, height=1080">
-<title>NFL Break Board Overlay</title>
+<title>Lost Boys Breaks - NFL Break Board</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Russo+One&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Teko:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --brand-purple: #7B2FBE;
+    --brand-blue: #1E3A8A;
+    --brand-cyan: #06D6E0;
+    --brand-magenta: #C74BDB;
+    --brand-dark: #0A0A1F;
+    --brand-darker: #050510;
+    --neon-purple: #A855F7;
+    --neon-cyan: #22D3EE;
+    --neon-blue: #3B82F6;
+    --claimed-green: #00FF88;
+    --claimed-green-dim: #00CC66;
+    --card-bg: rgba(15, 10, 40, 0.85);
+    --card-border: rgba(120, 60, 200, 0.25);
+  }
 
   body {
     width: 1920px;
     height: 1080px;
     overflow: hidden;
     background: transparent;
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Chakra Petch', sans-serif;
   }
 
   .board-container {
     width: 1920px;
     height: 1080px;
-    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0a0a1a 100%);
+    position: relative;
+    overflow: hidden;
+    background: var(--brand-darker);
+  }
+
+  /* === BACKGROUND EFFECTS === */
+  .bg-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Dark gradient base */
+  .bg-gradient {
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(123,47,190,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 85% 80%, rgba(6,214,224,0.1) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 70% at 50% 50%, rgba(30,58,138,0.12) 0%, transparent 60%),
+      linear-gradient(180deg, #08081a 0%, #0d0d2b 40%, #0a0a1f 100%);
+  }
+
+  /* Circuit board pattern */
+  .bg-circuits {
+    opacity: 0.06;
+    background-image:
+      linear-gradient(90deg, var(--neon-cyan) 1px, transparent 1px),
+      linear-gradient(0deg, var(--neon-cyan) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 70%);
+  }
+
+  /* Animated scan line */
+  .bg-scanline {
+    background: linear-gradient(180deg, transparent 0%, rgba(6,214,224,0.03) 50%, transparent 100%);
+    height: 200px;
+    width: 100%;
+    position: absolute;
+    top: -200px;
+    animation: scanMove 6s linear infinite;
+  }
+
+  @keyframes scanMove {
+    0% { top: -200px; }
+    100% { top: 1280px; }
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    animation: orbFloat 10s ease-in-out infinite;
+  }
+  .orb-1 { width: 300px; height: 300px; background: rgba(123,47,190,0.2); top: -50px; left: -50px; animation-delay: 0s; }
+  .orb-2 { width: 250px; height: 250px; background: rgba(6,214,224,0.15); bottom: -30px; right: 200px; animation-delay: 3s; }
+  .orb-3 { width: 200px; height: 200px; background: rgba(199,75,219,0.12); top: 200px; right: -50px; animation-delay: 6s; }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+    33% { transform: translate(20px, -30px) scale(1.15); opacity: 0.8; }
+    66% { transform: translate(-15px, 20px) scale(0.9); opacity: 0.5; }
+  }
+
+  /* Edge glow lines */
+  .edge-glow-top, .edge-glow-bottom {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    z-index: 50;
+  }
+  .edge-glow-top {
+    top: 0;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), var(--brand-magenta), transparent);
+    box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px rgba(6,214,224,0.3);
+  }
+  .edge-glow-bottom {
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, var(--brand-magenta), var(--neon-purple), var(--neon-cyan), transparent);
+    box-shadow: 0 0 15px var(--neon-purple), 0 0 30px rgba(168,85,247,0.3);
+  }
+
+  /* === HEADER === */
+  .header {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    height: 110px;
+    background: linear-gradient(180deg, rgba(10,10,31,0.95) 0%, rgba(10,10,31,0.7) 100%);
+    border-bottom: 1px solid rgba(120,60,200,0.3);
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--neon-cyan) 20%, var(--neon-purple) 50%, var(--brand-magenta) 80%, transparent 100%);
+    opacity: 0.7;
+  }
+
+  /* Logo area */
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+  }
+
+  .logo-img {
+    height: 80px;
+    width: auto;
+    filter: drop-shadow(0 0 12px rgba(6,214,224,0.4));
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-title {
+    font-family: 'Teko', sans-serif;
+    font-weight: 700;
+    font-size: 38px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--neon-cyan) 50%, var(--neon-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .logo-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    opacity: 0.8;
+  }
+
+  /* Center header info */
+  .header-center {
+    text-align: center;
+    flex: 1;
+    padding: 0 30px;
+  }
+
+  .break-number {
+    font-family: 'Teko', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    opacity: 0.9;
+  }
+
+  .box-info {
+    font-family: 'Teko', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(168,85,247,0.3);
+    line-height: 1.1;
+  }
+
+  /* Right header - stats */
+  .header-right {
+    display: flex;
+    gap: 25px;
+    flex-shrink: 0;
+  }
+
+  .stat-box {
+    text-align: center;
+    padding: 8px 20px;
+    background: rgba(123,47,190,0.15);
+    border: 1px solid rgba(168,85,247,0.3);
+    border-radius: 8px;
+    min-width: 120px;
     position: relative;
     overflow: hidden;
   }
 
-  /* Animated background particles */
-  .bg-effects {
+  .stat-box::before {
+    content: '';
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 0;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
   }
 
-  .bg-effects .glow {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
-    animation: float 8s ease-in-out infinite;
-  }
-
-  .bg-effects .glow:nth-child(1) { width: 400px; height: 400px; background: #ff4444; top: -100px; left: -100px; animation-delay: 0s; }
-  .bg-effects .glow:nth-child(2) { width: 350px; height: 350px; background: #4488ff; top: 300px; right: -50px; animation-delay: 2s; }
-  .bg-effects .glow:nth-child(3) { width: 300px; height: 300px; background: #44ff88; bottom: -50px; left: 400px; animation-delay: 4s; }
-  .bg-effects .glow:nth-child(4) { width: 250px; height: 250px; background: #ffaa00; top: 100px; left: 900px; animation-delay: 6s; }
-
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(30px, -20px) scale(1.1); }
-    50% { transform: translate(-20px, 30px) scale(0.9); }
-    75% { transform: translate(20px, 20px) scale(1.05); }
-  }
-
-  /* Header */
-  .header {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 30px;
-    height: 100px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%);
-    border-bottom: 3px solid;
-    border-image: linear-gradient(90deg, #ff4444, #ffaa00, #44ff88, #4488ff, #aa44ff) 1;
-  }
-
-  .header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .break-title {
-    font-family: 'Russo One', sans-serif;
-    font-size: 36px;
-    color: #ffffff;
-    text-transform: uppercase;
-    text-shadow: 0 0 20px rgba(255,100,0,0.5), 2px 2px 4px rgba(0,0,0,0.8);
-    letter-spacing: 2px;
-  }
-
-  .break-subtitle {
-    font-family: 'Oswald', sans-serif;
-    font-size: 18px;
-    color: #ffaa00;
-    font-weight: 400;
-    letter-spacing: 1px;
-  }
-
-  .header-center {
-    text-align: center;
-  }
-
-  .box-info {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: #00ffaa;
-    text-shadow: 0 0 15px rgba(0,255,170,0.4);
-    letter-spacing: 3px;
-  }
-
-  .header-right {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .hit-tracker-label {
-    font-size: 14px;
-    color: #888;
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
     text-transform: uppercase;
     letter-spacing: 2px;
   }
 
-  .hit-tracker {
-    font-family: 'Russo One', sans-serif;
-    font-size: 28px;
-    color: #ff4444;
-    text-shadow: 0 0 15px rgba(255,68,68,0.5);
-  }
-
-  .teams-claimed {
-    font-size: 16px;
-    color: #aaa;
+  .stat-value {
+    font-family: 'Teko', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
     margin-top: 2px;
   }
 
-  /* Teams Grid */
+  .stat-value.hits { color: var(--neon-cyan); text-shadow: 0 0 12px rgba(6,214,224,0.5); }
+  .stat-value.claimed-count { color: var(--neon-purple); text-shadow: 0 0 12px rgba(168,85,247,0.5); }
+
+  /* === TEAMS GRID === */
   .teams-grid {
     position: relative;
     z-index: 10;
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: 8px;
-    padding: 15px 20px;
-    height: calc(1080px - 100px);
+    gap: 7px;
+    padding: 12px 18px 14px;
+    height: calc(1080px - 110px);
   }
 
+  /* === TEAM CARD === */
   .team-slot {
     position: relative;
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: default;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 2px solid rgba(255,255,255,0.1);
-    background: rgba(20, 20, 40, 0.85);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
   }
 
+  /* Top color accent bar */
   .team-slot::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 4px;
-    background: var(--team-color, #666);
-    transition: height 0.3s ease;
+    height: 3px;
+    background: linear-gradient(90deg, var(--team-color, #666), var(--team-color2, var(--team-color, #666)));
+    opacity: 0.8;
+    transition: all 0.3s;
+  }
+
+  /* Inner glow effect */
+  .team-slot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, var(--team-color, transparent) 0%, transparent 70%);
+    opacity: 0.06;
+    transition: opacity 0.4s;
   }
 
   .team-slot:hover {
-    transform: scale(1.02);
-    border-color: var(--team-color, #666);
-    box-shadow: 0 0 20px rgba(var(--team-color-rgb, 100,100,100), 0.3);
+    border-color: rgba(168,85,247,0.5);
+    transform: scale(1.015);
+    box-shadow: 0 0 20px rgba(168,85,247,0.15);
   }
 
-  .team-logo-container {
-    width: 100px;
-    height: 100px;
+  .team-slot:hover::after {
+    opacity: 0.12;
+  }
+
+  /* Team logo */
+  .team-logo-wrap {
+    width: 90px;
+    height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     position: relative;
+    z-index: 2;
   }
 
   .team-logo {
-    width: 85px;
-    height: 85px;
+    width: 78px;
+    height: 78px;
     object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
     transition: all 0.4s ease;
   }
 
   .team-logo-placeholder {
-    width: 85px;
-    height: 85px;
+    width: 78px;
+    height: 78px;
     border-radius: 50%;
-    background: var(--team-color, #666);
+    background: linear-gradient(135deg, var(--team-color, #444), var(--team-color2, var(--team-color, #666)));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: white;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 -3px 8px rgba(0,0,0,0.3), inset 0 3px 8px rgba(255,255,255,0.1);
+    font-family: 'Teko', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    box-shadow:
+      0 4px 15px rgba(0,0,0,0.5),
+      inset 0 2px 6px rgba(255,255,255,0.15),
+      inset 0 -3px 8px rgba(0,0,0,0.3);
     transition: all 0.4s ease;
+    position: relative;
+  }
+
+  /* Ring around logo */
+  .team-logo-placeholder::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.08);
+    transition: border-color 0.3s;
   }
 
   .team-name {
-    font-family: 'Oswald', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
+    font-family: 'Teko', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
     color: #ffffff;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     text-align: center;
-    transition: all 0.3s ease;
+    z-index: 2;
+    transition: all 0.3s;
   }
 
   .team-city {
-    font-family: 'Oswald', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     font-size: 11px;
-    font-weight: 400;
-    color: #888;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 2px;
+    letter-spacing: 2px;
+    z-index: 2;
   }
 
-  /* Claimed state */
-  .team-slot.claimed {
-    background: linear-gradient(135deg, rgba(20,60,20,0.9) 0%, rgba(10,40,10,0.95) 100%);
-    border-color: #00ff66;
-    box-shadow: 0 0 25px rgba(0,255,102,0.2), inset 0 0 30px rgba(0,255,102,0.05);
-  }
-
-  .team-slot.claimed::before {
-    height: 100%;
-    opacity: 0.08;
-  }
-
-  .team-slot.claimed .team-logo-placeholder {
-    box-shadow: 0 0 20px rgba(0,255,102,0.3), 0 4px 15px rgba(0,0,0,0.4);
-  }
-
+  /* Buyer name */
   .buyer-name {
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: #00ff66;
-    text-shadow: 0 0 10px rgba(0,255,102,0.4);
-    margin-top: 4px;
-    max-width: 100%;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--claimed-green);
+    text-shadow: 0 0 10px rgba(0,255,136,0.4);
+    margin-top: 3px;
+    max-width: 95%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 0 5px;
+    text-align: center;
+    z-index: 2;
     opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s ease;
+    transform: translateY(8px);
+    transition: all 0.4s ease 0.1s;
+  }
+
+  /* === CLAIMED STATE === */
+  .team-slot.claimed {
+    background: linear-gradient(135deg, rgba(0,40,25,0.9) 0%, rgba(10,15,35,0.95) 100%);
+    border-color: rgba(0,255,136,0.35);
+    box-shadow:
+      0 0 20px rgba(0,255,136,0.08),
+      inset 0 0 30px rgba(0,255,136,0.03);
+  }
+
+  .team-slot.claimed::before {
+    background: var(--claimed-green);
+    height: 3px;
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(0,255,136,0.5);
+  }
+
+  .team-slot.claimed::after {
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,255,136,0.15) 0%, transparent 70%);
+    opacity: 0.3;
   }
 
   .team-slot.claimed .buyer-name {
@@ -264,45 +435,56 @@
     transform: translateY(0);
   }
 
-  /* Claimed checkmark */
+  .team-slot.claimed .team-logo-placeholder::after {
+    border-color: rgba(0,255,136,0.3);
+  }
+
+  /* Claimed badge */
   .claimed-badge {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    background: #00ff66;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    color: #000;
-    font-weight: bold;
+    z-index: 10;
     opacity: 0;
-    transform: scale(0);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 0 15px rgba(0,255,102,0.5);
-    z-index: 5;
+    transform: scale(0) rotate(-180deg);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: var(--claimed-green);
+    box-shadow: 0 0 12px rgba(0,255,136,0.5), 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  .claimed-badge svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: #000;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .team-slot.claimed .claimed-badge {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
 
-  /* Claim animation */
-  @keyframes claimPulse {
-    0% { box-shadow: 0 0 0 0 rgba(0,255,102,0.6); }
-    50% { box-shadow: 0 0 0 15px rgba(0,255,102,0); }
-    100% { box-shadow: 0 0 0 0 rgba(0,255,102,0); }
+  /* Claim pulse animation */
+  @keyframes claimBurst {
+    0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.5), inset 0 0 0 0 rgba(0,255,136,0.1); }
+    50% { box-shadow: 0 0 0 12px rgba(0,255,136,0), inset 0 0 20px rgba(0,255,136,0.05); }
+    100% { box-shadow: 0 0 0 0 rgba(0,255,136,0), inset 0 0 0 0 rgba(0,255,136,0); }
   }
 
   .team-slot.claim-animate {
-    animation: claimPulse 0.8s ease-out;
+    animation: claimBurst 0.8s ease-out;
   }
 
-  /* Sparkle effect on claim */
+  /* Sparkle particles */
   @keyframes sparkle {
     0% { opacity: 1; transform: translate(0,0) scale(1); }
     100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0); }
@@ -310,217 +492,233 @@
 
   .sparkle {
     position: absolute;
-    width: 6px;
-    height: 6px;
-    background: #00ff66;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     pointer-events: none;
-    z-index: 20;
-    animation: sparkle 0.6s ease-out forwards;
+    z-index: 30;
+    animation: sparkle 0.7s ease-out forwards;
   }
 
-  /* Available pulse */
-  @keyframes availablePulse {
-    0%, 100% { border-color: rgba(255,255,255,0.1); }
-    50% { border-color: rgba(255,255,255,0.25); }
+  .sparkle.green { background: var(--claimed-green); box-shadow: 0 0 4px var(--claimed-green); }
+  .sparkle.cyan { background: var(--neon-cyan); box-shadow: 0 0 4px var(--neon-cyan); }
+  .sparkle.purple { background: var(--neon-purple); box-shadow: 0 0 4px var(--neon-purple); }
+
+  /* Subtle idle shimmer on available cards */
+  @keyframes shimmer {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.04; }
   }
 
-  .team-slot:not(.claimed) {
-    animation: availablePulse 3s ease-in-out infinite;
+  .team-slot:not(.claimed)::after {
+    animation: shimmer 4s ease-in-out infinite;
+    animation-delay: var(--shimmer-delay, 0s);
   }
 
-  /* Scanline effect */
-  .scanline {
+  /* Noise/grain overlay */
+  .noise-overlay {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
+    inset: 0;
     z-index: 100;
+    pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 128px 128px;
   }
 </style>
 </head>
 <body>
 <div class="board-container" id="board">
-  <div class="bg-effects">
-    <div class="glow"></div>
-    <div class="glow"></div>
-    <div class="glow"></div>
-    <div class="glow"></div>
+  <!-- Background layers -->
+  <div class="bg-layer bg-gradient"></div>
+  <div class="bg-layer bg-circuits"></div>
+  <div class="bg-layer">
+    <div class="bg-scanline"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
   </div>
+  <div class="edge-glow-top"></div>
+  <div class="edge-glow-bottom"></div>
 
+  <!-- Header -->
   <div class="header">
-    <div class="header-left">
-      <div class="break-title" id="breakTitle">NFL FULL CASE BREAK</div>
-      <div class="break-subtitle" id="breakSubtitle">BREAK #001</div>
+    <div class="header-logo">
+      <img class="logo-img" src="Break Logo.png" alt="Lost Boys Breaks" onerror="this.style.display='none'">
+      <div class="logo-text">
+        <div class="logo-title" id="breakTitle">LOST BOYS BREAKS</div>
+        <div class="logo-subtitle" id="breakSubtitle">BREAK #001</div>
+      </div>
     </div>
+
     <div class="header-center">
+      <div class="break-number">NFL FULL CASE BREAK</div>
       <div class="box-info" id="boxInfo">2024 PANINI PRIZM FOOTBALL HOBBY BOX</div>
     </div>
+
     <div class="header-right">
-      <div class="hit-tracker-label">HIT TRACKER</div>
-      <div class="hit-tracker" id="hitTracker">0 HITS</div>
-      <div class="teams-claimed" id="teamsClaimed">0 / 32 CLAIMED</div>
+      <div class="stat-box">
+        <div class="stat-label">Hits</div>
+        <div class="stat-value hits" id="hitTracker">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Claimed</div>
+        <div class="stat-value claimed-count" id="teamsClaimed">0 / 32</div>
+      </div>
     </div>
   </div>
 
+  <!-- Teams Grid -->
   <div class="teams-grid" id="teamsGrid"></div>
 
-  <div class="scanline"></div>
+  <div class="noise-overlay"></div>
 </div>
 
 <script>
 const NFL_TEAMS = [
-  { abbr: "ARI", name: "Cardinals", city: "Arizona", color: "#97233F", colorRgb: "151,35,63" },
-  { abbr: "ATL", name: "Falcons", city: "Atlanta", color: "#A71930", colorRgb: "167,25,48" },
-  { abbr: "BAL", name: "Ravens", city: "Baltimore", color: "#241773", colorRgb: "36,23,115" },
-  { abbr: "BUF", name: "Bills", city: "Buffalo", color: "#00338D", colorRgb: "0,51,141" },
-  { abbr: "CAR", name: "Panthers", city: "Carolina", color: "#0085CA", colorRgb: "0,133,202" },
-  { abbr: "CHI", name: "Bears", city: "Chicago", color: "#0B162A", colorRgb: "11,22,42" },
-  { abbr: "CIN", name: "Bengals", city: "Cincinnati", color: "#FB4F14", colorRgb: "251,79,20" },
-  { abbr: "CLE", name: "Browns", city: "Cleveland", color: "#FF3C00", colorRgb: "255,60,0" },
-  { abbr: "DAL", name: "Cowboys", city: "Dallas", color: "#003594", colorRgb: "0,53,148" },
-  { abbr: "DEN", name: "Broncos", city: "Denver", color: "#FB4F14", colorRgb: "251,79,20" },
-  { abbr: "DET", name: "Lions", city: "Detroit", color: "#0076B6", colorRgb: "0,118,182" },
-  { abbr: "GB",  name: "Packers", city: "Green Bay", color: "#203731", colorRgb: "32,55,49" },
-  { abbr: "HOU", name: "Texans", city: "Houston", color: "#03202F", colorRgb: "3,32,47" },
-  { abbr: "IND", name: "Colts", city: "Indianapolis", color: "#002C5F", colorRgb: "0,44,95" },
-  { abbr: "JAX", name: "Jaguars", city: "Jacksonville", color: "#006778", colorRgb: "0,103,120" },
-  { abbr: "KC",  name: "Chiefs", city: "Kansas City", color: "#E31837", colorRgb: "227,24,55" },
-  { abbr: "LV",  name: "Raiders", city: "Las Vegas", color: "#A5ACAF", colorRgb: "165,172,175" },
-  { abbr: "LAC", name: "Chargers", city: "Los Angeles", color: "#0080C6", colorRgb: "0,128,198" },
-  { abbr: "LAR", name: "Rams", city: "Los Angeles", color: "#003594", colorRgb: "0,53,148" },
-  { abbr: "MIA", name: "Dolphins", city: "Miami", color: "#008E97", colorRgb: "0,142,151" },
-  { abbr: "MIN", name: "Vikings", city: "Minnesota", color: "#4F2683", colorRgb: "79,38,131" },
-  { abbr: "NE",  name: "Patriots", city: "New England", color: "#002244", colorRgb: "0,34,68" },
-  { abbr: "NO",  name: "Saints", city: "New Orleans", color: "#D3BC8D", colorRgb: "211,188,141" },
-  { abbr: "NYG", name: "Giants", city: "New York", color: "#0B2265", colorRgb: "11,34,101" },
-  { abbr: "NYJ", name: "Jets", city: "New York", color: "#125740", colorRgb: "18,87,64" },
-  { abbr: "PHI", name: "Eagles", city: "Philadelphia", color: "#004C54", colorRgb: "0,76,84" },
-  { abbr: "PIT", name: "Steelers", city: "Pittsburgh", color: "#FFB612", colorRgb: "255,182,18" },
-  { abbr: "SF",  name: "49ers", city: "San Francisco", color: "#AA0000", colorRgb: "170,0,0" },
-  { abbr: "SEA", name: "Seahawks", city: "Seattle", color: "#002244", colorRgb: "0,34,68" },
-  { abbr: "TB",  name: "Buccaneers", city: "Tampa Bay", color: "#D50A0A", colorRgb: "213,10,10" },
-  { abbr: "TEN", name: "Titans", city: "Tennessee", color: "#0C2340", colorRgb: "12,35,64" },
-  { abbr: "WAS", name: "Commanders", city: "Washington", color: "#5A1414", colorRgb: "90,20,20" }
+  { abbr: "ARI", name: "Cardinals", city: "Arizona", color: "#97233F", color2: "#000000" },
+  { abbr: "ATL", name: "Falcons", city: "Atlanta", color: "#A71930", color2: "#000000" },
+  { abbr: "BAL", name: "Ravens", city: "Baltimore", color: "#241773", color2: "#9E7C0C" },
+  { abbr: "BUF", name: "Bills", city: "Buffalo", color: "#00338D", color2: "#C60C30" },
+  { abbr: "CAR", name: "Panthers", city: "Carolina", color: "#0085CA", color2: "#101820" },
+  { abbr: "CHI", name: "Bears", city: "Chicago", color: "#0B162A", color2: "#C83803" },
+  { abbr: "CIN", name: "Bengals", city: "Cincinnati", color: "#FB4F14", color2: "#000000" },
+  { abbr: "CLE", name: "Browns", city: "Cleveland", color: "#FF3C00", color2: "#311D00" },
+  { abbr: "DAL", name: "Cowboys", city: "Dallas", color: "#003594", color2: "#869397" },
+  { abbr: "DEN", name: "Broncos", city: "Denver", color: "#FB4F14", color2: "#002244" },
+  { abbr: "DET", name: "Lions", city: "Detroit", color: "#0076B6", color2: "#B0B7BC" },
+  { abbr: "GB",  name: "Packers", city: "Green Bay", color: "#203731", color2: "#FFB612" },
+  { abbr: "HOU", name: "Texans", city: "Houston", color: "#03202F", color2: "#A71930" },
+  { abbr: "IND", name: "Colts", city: "Indianapolis", color: "#002C5F", color2: "#A2AAAD" },
+  { abbr: "JAX", name: "Jaguars", city: "Jacksonville", color: "#006778", color2: "#9F792C" },
+  { abbr: "KC",  name: "Chiefs", city: "Kansas City", color: "#E31837", color2: "#FFB81C" },
+  { abbr: "LV",  name: "Raiders", city: "Las Vegas", color: "#A5ACAF", color2: "#000000" },
+  { abbr: "LAC", name: "Chargers", city: "Los Angeles", color: "#0080C6", color2: "#FFC20E" },
+  { abbr: "LAR", name: "Rams", city: "Los Angeles", color: "#003594", color2: "#FFA300" },
+  { abbr: "MIA", name: "Dolphins", city: "Miami", color: "#008E97", color2: "#FC4C02" },
+  { abbr: "MIN", name: "Vikings", city: "Minnesota", color: "#4F2683", color2: "#FFC62F" },
+  { abbr: "NE",  name: "Patriots", city: "New England", color: "#002244", color2: "#C60C30" },
+  { abbr: "NO",  name: "Saints", city: "New Orleans", color: "#D3BC8D", color2: "#101820" },
+  { abbr: "NYG", name: "Giants", city: "New York", color: "#0B2265", color2: "#A71930" },
+  { abbr: "NYJ", name: "Jets", city: "New York", color: "#125740", color2: "#000000" },
+  { abbr: "PHI", name: "Eagles", city: "Philadelphia", color: "#004C54", color2: "#A5ACAF" },
+  { abbr: "PIT", name: "Steelers", city: "Pittsburgh", color: "#FFB612", color2: "#101820" },
+  { abbr: "SF",  name: "49ers", city: "San Francisco", color: "#AA0000", color2: "#B3995D" },
+  { abbr: "SEA", name: "Seahawks", city: "Seattle", color: "#002244", color2: "#69BE28" },
+  { abbr: "TB",  name: "Buccaneers", city: "Tampa Bay", color: "#D50A0A", color2: "#FF7900" },
+  { abbr: "TEN", name: "Titans", city: "Tennessee", color: "#0C2340", color2: "#4B92DB" },
+  { abbr: "WAS", name: "Commanders", city: "Washington", color: "#5A1414", color2: "#FFB612" }
 ];
 
-// State
-let boardState = {};
-try {
-  const saved = localStorage.getItem('nflBreakBoard');
-  if (saved) boardState = JSON.parse(saved);
-} catch(e) {}
-
-function saveState() {
-  localStorage.setItem('nflBreakBoard', JSON.stringify(boardState));
+// ESPN logo CDN mapping
+function getLogoUrl(abbr) {
+  const espnMap = {
+    ARI: 'ari', ATL: 'atl', BAL: 'bal', BUF: 'buf', CAR: 'car', CHI: 'chi',
+    CIN: 'cin', CLE: 'cle', DAL: 'dal', DEN: 'den', DET: 'det', GB: 'gb',
+    HOU: 'hou', IND: 'ind', JAX: 'jax', KC: 'kc', LV: 'lv', LAC: 'lac',
+    LAR: 'lar', MIA: 'mia', MIN: 'min', NE: 'ne', NO: 'no', NYG: 'nyg',
+    NYJ: 'nyj', PHI: 'phi', PIT: 'pit', SF: 'sf', SEA: 'sea', TB: 'tb',
+    TEN: 'ten', WAS: 'wsh'
+  };
+  return `https://a.espncdn.com/i/teamlogos/nfl/500/${espnMap[abbr]}.png`;
 }
 
-// Build grid
+let boardState = {};
+try { const s = localStorage.getItem('nflBreakBoard'); if (s) boardState = JSON.parse(s); } catch(e) {}
+function saveState() { localStorage.setItem('nflBreakBoard', JSON.stringify(boardState)); }
+
 const grid = document.getElementById('teamsGrid');
-NFL_TEAMS.forEach(team => {
+NFL_TEAMS.forEach((team, i) => {
   const slot = document.createElement('div');
   slot.className = 'team-slot';
   slot.id = `team-${team.abbr}`;
   slot.style.setProperty('--team-color', team.color);
-  slot.style.setProperty('--team-color-rgb', team.colorRgb);
-
-  const hasLogo = false; // Set to true when logo files are added
+  slot.style.setProperty('--team-color2', team.color2);
+  slot.style.setProperty('--shimmer-delay', `${(i * 0.3) % 4}s`);
 
   slot.innerHTML = `
-    <div class="claimed-badge">&#10003;</div>
-    <div class="team-logo-container">
-      ${hasLogo
-        ? `<img class="team-logo" src="logos/${team.abbr.toLowerCase()}.png" alt="${team.name}">`
-        : `<div class="team-logo-placeholder">${team.abbr}</div>`
-      }
+    <div class="claimed-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="team-logo-wrap">
+      <img class="team-logo" src="${getLogoUrl(team.abbr)}" alt="${team.name}"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="team-logo-placeholder" style="display:none;">${team.abbr}</div>
     </div>
     <div class="team-city">${team.city}</div>
     <div class="team-name">${team.name}</div>
     <div class="buyer-name" id="buyer-${team.abbr}"></div>
   `;
-
   grid.appendChild(slot);
 });
 
-// Apply saved state
 function applyState() {
   NFL_TEAMS.forEach(team => {
     const slot = document.getElementById(`team-${team.abbr}`);
-    const buyerEl = document.getElementById(`buyer-${team.abbr}`);
+    const buyer = document.getElementById(`buyer-${team.abbr}`);
     if (boardState[team.abbr]) {
       slot.classList.add('claimed');
-      buyerEl.textContent = boardState[team.abbr];
+      buyer.textContent = boardState[team.abbr];
     } else {
       slot.classList.remove('claimed');
-      buyerEl.textContent = '';
+      buyer.textContent = '';
     }
   });
   updateCounter();
 }
 
 function updateCounter() {
-  const claimed = Object.keys(boardState).length;
-  document.getElementById('teamsClaimed').textContent = `${claimed} / 32 CLAIMED`;
+  const c = Object.keys(boardState).length;
+  document.getElementById('teamsClaimed').textContent = `${c} / 32`;
 }
 
-function createSparkles(element) {
-  const rect = element.getBoundingClientRect();
-  for (let i = 0; i < 12; i++) {
-    const sparkle = document.createElement('div');
-    sparkle.className = 'sparkle';
-    const angle = (Math.PI * 2 * i) / 12;
-    const dist = 40 + Math.random() * 40;
-    sparkle.style.left = (rect.width / 2) + 'px';
-    sparkle.style.top = (rect.height / 2) + 'px';
-    sparkle.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
-    sparkle.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
-    element.appendChild(sparkle);
-    setTimeout(() => sparkle.remove(), 600);
+function createSparkles(el) {
+  const rect = el.getBoundingClientRect();
+  const colors = ['green', 'cyan', 'purple'];
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('div');
+    s.className = `sparkle ${colors[i % 3]}`;
+    const angle = (Math.PI * 2 * i) / 16;
+    const dist = 30 + Math.random() * 50;
+    s.style.left = (rect.width / 2) + 'px';
+    s.style.top = (rect.height / 2) + 'px';
+    s.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+    s.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+    el.appendChild(s);
+    setTimeout(() => s.remove(), 700);
   }
 }
 
-// Listen for messages from control panel
-window.addEventListener('message', (e) => {
-  if (e.data.type === 'claim') {
-    boardState[e.data.team] = e.data.buyer;
+// Listen for commands
+window.addEventListener('message', e => handleCommand(e.data));
+const channel = new BroadcastChannel('nfl-break-board');
+channel.onmessage = e => handleCommand(e.data);
+
+function handleCommand(data) {
+  if (data.type === 'claim') {
+    boardState[data.team] = data.buyer;
     saveState();
-    const slot = document.getElementById(`team-${e.data.team}`);
+    const slot = document.getElementById(`team-${data.team}`);
     slot.classList.add('claimed', 'claim-animate');
     createSparkles(slot);
-    document.getElementById(`buyer-${e.data.team}`).textContent = e.data.buyer;
+    document.getElementById(`buyer-${data.team}`).textContent = data.buyer;
     setTimeout(() => slot.classList.remove('claim-animate'), 800);
     updateCounter();
-  } else if (e.data.type === 'unclaim') {
-    delete boardState[e.data.team];
+  } else if (data.type === 'unclaim') {
+    delete boardState[data.team];
     saveState();
-    const slot = document.getElementById(`team-${e.data.team}`);
-    slot.classList.remove('claimed');
-    document.getElementById(`buyer-${e.data.team}`).textContent = '';
+    document.getElementById(`team-${data.team}`).classList.remove('claimed');
+    document.getElementById(`buyer-${data.team}`).textContent = '';
     updateCounter();
-  } else if (e.data.type === 'reset') {
+  } else if (data.type === 'reset') {
     boardState = {};
     saveState();
     applyState();
-  } else if (e.data.type === 'updateHeader') {
-    if (e.data.breakTitle) document.getElementById('breakTitle').textContent = e.data.breakTitle;
-    if (e.data.breakSubtitle) document.getElementById('breakSubtitle').textContent = e.data.breakSubtitle;
-    if (e.data.boxInfo) document.getElementById('boxInfo').textContent = e.data.boxInfo;
-    if (e.data.hitTracker) document.getElementById('hitTracker').textContent = e.data.hitTracker;
+  } else if (data.type === 'updateHeader') {
+    if (data.breakTitle) document.getElementById('breakTitle').textContent = data.breakTitle;
+    if (data.breakSubtitle) document.getElementById('breakSubtitle').textContent = data.breakSubtitle;
+    if (data.boxInfo) document.getElementById('boxInfo').textContent = data.boxInfo;
+    if (data.hitTracker) document.getElementById('hitTracker').textContent = data.hitTracker;
   }
-});
-
-// Also listen for BroadcastChannel (cross-tab communication)
-const channel = new BroadcastChannel('nfl-break-board');
-channel.onmessage = (e) => {
-  window.dispatchEvent(new MessageEvent('message', { data: e.data }));
-};
+}
 
 applyState();
 </script>
